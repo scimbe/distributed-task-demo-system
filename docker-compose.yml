@@ -1,0 +1,114 @@
+version: '3'
+
+services:
+  # Message Broker
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"   # AMQP-Protokoll
+      - "15672:15672" # Management-Interface
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Status-Speicher
+  redis:
+    image: redis:6
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Task-Manager
+  task-manager:
+    build:
+      context: ./task-manager
+      dockerfile: Dockerfile
+    depends_on:
+      - rabbitmq
+      - redis
+    ports:
+      - "8080:8080"
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - REDIS_URL=redis:6379
+    volumes:
+      - ./task-manager:/app
+
+  # Worker-Knoten (3 Instanzen)
+  worker-node-1:
+    build:
+      context: ./worker-node
+      dockerfile: Dockerfile
+    depends_on:
+      - rabbitmq
+      - redis
+      - task-manager
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - REDIS_URL=redis:6379
+      - WORKER_ID=worker-1
+    volumes:
+      - ./worker-node:/app
+
+  worker-node-2:
+    build:
+      context: ./worker-node
+      dockerfile: Dockerfile
+    depends_on:
+      - rabbitmq
+      - redis
+      - task-manager
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - REDIS_URL=redis:6379
+      - WORKER_ID=worker-2
+    volumes:
+      - ./worker-node:/app
+
+  worker-node-3:
+    build:
+      context: ./worker-node
+      dockerfile: Dockerfile
+    depends_on:
+      - rabbitmq
+      - redis
+      - task-manager
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - REDIS_URL=redis:6379
+      - WORKER_ID=worker-3
+    volumes:
+      - ./worker-node:/app
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - task-manager
+    environment:
+      - REACT_APP_API_URL=http://localhost:8080
+
+volumes:
+  rabbitmq_data:
+  redis_data:
