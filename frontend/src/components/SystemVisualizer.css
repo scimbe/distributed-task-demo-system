@@ -1,0 +1,47 @@
+.system-visualizer {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  overflow: hidden;
+}
+
+.system-visualizer svg {
+  width: 100%;
+  height: 100%;
+}
+
+.tooltip {
+  position: absolute;
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  border-radius: 4px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 1000;
+  max-width: 250px;
+  font-size: 12px;
+}
+
+.worker-node:hover circle {
+  stroke: #f1c40f;
+  stroke-width: 3px;
+}
+
+.task-node:hover circle {
+  stroke: #f1c40f;
+  stroke-width: 3px;
+}
+
+.legend rect {
+  stroke: #333;
+  stroke-width: 1px;
+}
+
+.legend text {
+  font-size: 12px;
+}
