@@ -1,0 +1,29 @@
+.task-detail-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.task-detail-card .card-header {
+  background-color: #f8f9fa;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.task-detail-card .card-body {
+  padding: 20px;
+}
+
+.data-json {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 5px;
+  border: 1px solid #dee2e6;
+  overflow-x: auto;
+  font-size: 14px;
+  line-height: 1.5;
+}
