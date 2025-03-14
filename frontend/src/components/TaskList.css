@@ -1,0 +1,29 @@
+.task-list {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.task-list .table {
+  margin-bottom: 0;
+}
+
+.task-list tr {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.task-list tr:hover {
+  background-color: #f8f9fa;
+}
+
+.task-list tr.selected-task {
+  background-color: #e9f5ff;
+}
+
+.task-list .progress {
+  height: 10px;
+  margin-top: 5px;
+}
