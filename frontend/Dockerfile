@@ -2,16 +2,16 @@ FROM node:16-alpine
 
 WORKDIR /app
 
-# Abhängigkeiten installieren
+# Install dependencies
 COPY package*.json ./
 RUN npm install
 
-# Quellcode kopieren
+# Copy source code
 COPY . .
 
-# Anwendung bauen
-RUN npm run build
+# Set permissions for node_modules
+RUN mkdir -p /app/node_modules/.cache && chmod -R 777 /app/node_modules
 
-# Anwendung starten
+# For development environment
 EXPOSE 3000
 CMD ["npm", "start"]

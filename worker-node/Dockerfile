@@ -2,15 +2,18 @@ FROM golang:1.18
 
 WORKDIR /app
 
-# Abhängigkeiten kopieren und installieren
+# Install dependencies
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Quellcode kopieren
+# Copy source code
 COPY . .
 
-# Anwendung bauen
-RUN go build -o main .
+# Build the application
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
 
-# Anwendung starten
-CMD ["./main"]
+# Ensure the binary is executable
+RUN chmod +x /app/main
+
+# Run the application
+CMD ["/app/main"]

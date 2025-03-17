@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/google/uuid"
 	"github.com/streadway/amqp"
 )
 
@@ -64,7 +63,7 @@ type MessagePayload struct {
 }
 
 // NewWorker erstellt eine neue Worker-Instanz
-func NewWorker(amqpConn *amqp.Connection, redisAddr string) (*Worker, error) {
+func NewWorker(amqpConn *amqp.Connection, redisAddr string, workerID string) (*Worker, error) {
 	channel, err := amqpConn.Channel()
 	if err != nil {
 		return nil, fmt.Errorf("Fehler beim Erstellen des AMQP-Kanals: %w", err)
@@ -76,7 +75,7 @@ func NewWorker(amqpConn *amqp.Connection, redisAddr string) (*Worker, error) {
 	})
 
 	worker := &Worker{
-		ID:             uuid.New().String(),
+		ID:             workerID,
 		Status:         WorkerIdle,
 		amqpChannel:    channel,
 		redisClient:    redisClient,
@@ -389,15 +388,34 @@ func main() {
 	// Zufallsgenerator initialisieren
 	rand.Seed(time.Now().UnixNano())
 
+	// Worker-ID aus Umgebungsvariable lesen
+	workerID := os.Getenv("WORKER_ID")
+	if workerID == "" {
+		// Fallback auf zufällige ID, falls keine Umgebungsvariable gesetzt ist
+		workerID = fmt.Sprintf("worker-%d", rand.Intn(1000))
+	}
+
+	// RabbitMQ-URL aus Umgebungsvariable lesen
+	rabbitmqURL := os.Getenv("RABBITMQ_URL")
+	if rabbitmqURL == "" {
+		rabbitmqURL = "amqp://guest:guest@rabbitmq:5672/"
+	}
+
+	// Redis-URL aus Umgebungsvariable lesen
+	redisURL := os.Getenv("REDIS_URL")
+	if redisURL == "" {
+		redisURL = "redis:6379"
+	}
+
 	// Verbindung zu RabbitMQ herstellen
-	amqpConn, err := amqp.Dial("amqp://guest:guest@rabbitmq:5672/")
+	amqpConn, err := amqp.Dial(rabbitmqURL)
 	if err != nil {
 		log.Fatalf("Fehler beim Verbinden mit RabbitMQ: %v", err)
 	}
 	defer amqpConn.Close()
 
 	// Worker erstellen
-	worker, err := NewWorker(amqpConn, "redis:6379")
+	worker, err := NewWorker(amqpConn, redisURL, workerID)
 	if err != nil {
 		log.Fatalf("Fehler beim Erstellen des Workers: %v", err)
 	}

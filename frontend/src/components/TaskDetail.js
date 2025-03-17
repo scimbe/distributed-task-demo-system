@@ -27,8 +27,22 @@ const TaskDetail = ({ task }) => {
 
   // Formatieren des Datums
   const formatDate = (dateStr) => {
-    const date = new Date(dateStr);
-    return date.toLocaleString();
+    if (!dateStr) return 'N/A';
+    
+    try {
+      // Bei ISO-String-Format: direkt parsen
+      let date = new Date(dateStr);
+      
+      // Überprüfen, ob das Datum gültig ist
+      if (isNaN(date.getTime())) {
+        return 'Ungültiges Datum';
+      }
+      
+      return date.toLocaleString();
+    } catch (e) {
+      console.error("Fehler beim Formatieren des Datums:", e);
+      return "Fehler beim Formatieren";
+    }
   };
 
   // JSON formatieren
@@ -53,9 +67,9 @@ const TaskDetail = ({ task }) => {
           <Col md={6}>
             <p><strong>Typ:</strong> {task.type}</p>
             <p><strong>Priorität:</strong> {task.priority}</p>
-            <p><strong>Erstellt:</strong> {formatDate(task.createdAt)}</p>
-            <p><strong>Aktualisiert:</strong> {formatDate(task.updatedAt)}</p>
-            <p><strong>Worker:</strong> {task.workerId || 'Nicht zugewiesen'}</p>
+            <p><strong>Erstellt:</strong> {formatDate(task.created_at)}</p>
+            <p><strong>Aktualisiert:</strong> {formatDate(task.updated_at)}</p>
+            <p><strong>Worker:</strong> {task.worker_id || 'Nicht zugewiesen'}</p>
           </Col>
           <Col md={6}>
             <p><strong>Fortschritt:</strong></p>
@@ -74,10 +88,10 @@ const TaskDetail = ({ task }) => {
         <h6 className="mt-4">Task-Daten:</h6>
         <pre className="data-json">{formatJSON(task.data || {})}</pre>
         
-        {task.checkpointData && (
+        {task.checkpoint_data && (
           <>
             <h6 className="mt-4">Checkpoint-Daten:</h6>
-            <pre className="data-json">{formatJSON(task.checkpointData || {})}</pre>
+            <pre className="data-json">{formatJSON(task.checkpoint_data || {})}</pre>
           </>
         )}
       </Card.Body>

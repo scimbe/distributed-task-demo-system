@@ -37,6 +37,14 @@ case "$1" in
     docker-compose up -d
     echo -e "${GREEN}System neu gestartet.${NC}"
     ;;
+  
+  rebuild)
+    echo -e "${YELLOW}Neubau aller Container ohne Cache...${NC}"
+    docker-compose down
+    docker-compose build --no-cache
+    docker-compose up -d
+    echo -e "${GREEN}System neu gebaut und gestartet.${NC}"
+    ;;
     
   logs)
     echo -e "${BLUE}Zeige Logs an...${NC}"
@@ -129,6 +137,7 @@ case "$1" in
     echo "  ./demo.sh start         - Startet das System"
     echo "  ./demo.sh stop          - Stoppt das System"
     echo "  ./demo.sh restart       - Neustart des Systems"
+    echo "  ./demo.sh rebuild       - Baut alle Container neu ohne Cache und startet das System"
     echo "  ./demo.sh logs [dienst] - Zeigt Logs (optional für einen bestimmten Dienst)"
     echo "  ./demo.sh create-task   - Erstellt einen Demo-Task"
     echo "  ./demo.sh fail-worker N - Simuliert Ausfall von Worker N (1-3)"

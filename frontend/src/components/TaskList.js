@@ -8,7 +8,12 @@ const TaskList = ({ tasks, onSelectTask, selectedTaskId }) => {
     if (a.priority !== b.priority) {
       return b.priority - a.priority; // Höhere Priorität zuerst
     }
-    return new Date(b.createdAt) - new Date(a.createdAt); // Neuere zuerst
+    
+    // Versuchen, die Zeitstempel zu vergleichen
+    const dateA = a.created_at ? new Date(a.created_at) : new Date(0);
+    const dateB = b.created_at ? new Date(b.created_at) : new Date(0);
+    
+    return dateB - dateA; // Neuere zuerst
   });
 
   // Status-Farbe
@@ -31,6 +36,22 @@ const TaskList = ({ tasks, onSelectTask, selectedTaskId }) => {
       default:
         return 'secondary';
     }
+  };
+
+  // Task-ID formatieren
+  const formatTaskId = (id) => {
+    if (!id) return 'N/A';
+    return id.substring(0, 8) + '...';
+  };
+
+  // Worker-ID formatieren
+  const formatWorkerId = (workerId) => {
+    if (!workerId) return '-';
+    // Bei worker-1, worker-2, etc. nur die Nummer anzeigen
+    if (workerId.startsWith('worker-')) {
+      return 'Worker ' + workerId.substring(7);
+    }
+    return workerId.substring(0, 8) + '...';
   };
 
   return (
@@ -58,7 +79,7 @@ const TaskList = ({ tasks, onSelectTask, selectedTaskId }) => {
                 onClick={() => onSelectTask(task)}
                 className={selectedTaskId === task.id ? 'selected-task' : ''}
               >
-                <td>{task.id.substring(0, 8)}...</td>
+                <td>{formatTaskId(task.id)}</td>
                 <td>{task.type}</td>
                 <td>
                   <Badge bg={getStatusVariant(task.status)}>
@@ -76,7 +97,7 @@ const TaskList = ({ tasks, onSelectTask, selectedTaskId }) => {
                     }
                   />
                 </td>
-                <td>{task.workerId ? task.workerId.substring(0, 8) + '...' : '-'}</td>
+                <td>{formatWorkerId(task.worker_id || task.workerId)}</td>
               </tr>
             ))
           )}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Row, Col, Card, Badge, Button, Modal, Form } from 'react-bootstrap';
+import { Row, Col, Card, Badge, Button, Modal, Form, ListGroup } from 'react-bootstrap';
 import './WorkerGrid.css';
 
 const WorkerGrid = ({ workers, onMigrateTask, tasks }) => {
@@ -31,7 +31,7 @@ const WorkerGrid = ({ workers, onMigrateTask, tasks }) => {
     setSelectedWorker(worker);
     
     // Finde den aktuellen Task
-    const currentTask = tasks.find(task => task.workerId === worker.id);
+    const currentTask = tasks.find(task => (task.worker_id === worker.id || task.workerId === worker.id));
     if (currentTask) {
       setSelectedTask(currentTask.id);
     } else {
@@ -53,7 +53,7 @@ const WorkerGrid = ({ workers, onMigrateTask, tasks }) => {
   const getAvailableTasks = () => {
     if (!selectedWorker) return [];
     return tasks.filter(task => 
-      task.workerId === selectedWorker.id && 
+      (task.worker_id === selectedWorker.id || task.workerId === selectedWorker.id) && 
       ['RUNNING', 'ASSIGNED'].includes(task.status)
     );
   };
@@ -68,6 +68,43 @@ const WorkerGrid = ({ workers, onMigrateTask, tasks }) => {
     );
   };
 
+  // Filtere Tasks für jeden Worker
+  const getWorkerTasks = (workerId) => {
+    return tasks.filter(task => 
+      (task.worker_id === workerId || task.workerId === workerId) && 
+      task.status !== 'COMPLETED' && 
+      task.status !== 'FAILED'
+    );
+  };
+
+  // Task-Status-Badge
+  const renderTaskStatusBadge = (status) => {
+    let variant;
+    switch (status) {
+      case 'RUNNING':
+        variant = 'primary';
+        break;
+      case 'ASSIGNED':
+        variant = 'info';
+        break;
+      case 'MIGRATING':
+        variant = 'warning';
+        break;
+      case 'RECOVERING':
+        variant = 'warning';
+        break;
+      case 'COMPLETED':
+        variant = 'success';
+        break;
+      case 'FAILED':
+        variant = 'danger';
+        break;
+      default:
+        variant = 'secondary';
+    }
+    return <Badge bg={variant}>{status}</Badge>;
+  };
+
   return (
     <div className="worker-grid">
       <Row>
@@ -76,57 +113,84 @@ const WorkerGrid = ({ workers, onMigrateTask, tasks }) => {
             <p>Keine Worker verfügbar</p>
           </Col>
         ) : (
-          workers.map(worker => (
-            <Col md={6} lg={4} key={worker.id} className="mb-3">
-              <Card 
-                className="worker-card h-100"
-                style={{ borderLeft: `5px solid ${getStatusColor(worker.status)}` }}
-              >
-                <Card.Body>
-                  <div className="d-flex justify-content-between align-items-start">
+          workers.map(worker => {
+            const workerTasks = getWorkerTasks(worker.id);
+            
+            return (
+              <Col md={6} lg={4} key={worker.id} className="mb-3">
+                <Card 
+                  className="worker-card h-100"
+                  style={{ borderLeft: `5px solid ${getStatusColor(worker.status)}` }}
+                >
+                  <Card.Header className="d-flex justify-content-between align-items-center">
                     <div>
-                      <h5 className="mb-1">Worker {worker.id.substring(0, 8)}...</h5>
-                      <Badge 
-                        bg={
-                          worker.status === 'IDLE' ? 'success' :
-                          worker.status === 'BUSY' ? 'warning' :
-                          worker.status === 'OVERLOADED' ? 'danger' :
-                          worker.status === 'FAILING' ? 'danger' :
-                          'secondary'
-                        }
-                      >
-                        {worker.status}
-                      </Badge>
+                      <h5 className="mb-0">Worker {worker.id.replace('worker-', '')}</h5>
                     </div>
-                  </div>
+                    <Badge 
+                      bg={
+                        worker.status === 'IDLE' ? 'success' :
+                        worker.status === 'BUSY' ? 'warning' :
+                        worker.status === 'OVERLOADED' ? 'danger' :
+                        worker.status === 'FAILING' ? 'danger' :
+                        'secondary'
+                      }
+                    >
+                      {worker.status}
+                    </Badge>
+                  </Card.Header>
                   
-                  <div className="mt-3">
-                    <p className="mb-1">
-                      <strong>Aktueller Task:</strong><br/>
-                      {worker.task ? worker.task.substring(0, 12) + '...' : 'Kein aktiver Task'}
-                    </p>
+                  <Card.Body>
+                    <div className="mb-3">
+                      <strong>Aktive Tasks:</strong> {workerTasks.length}
+                    </div>
                     
-                    <p className="mb-1">
-                      <strong>Letztes Update:</strong><br/>
-                      {worker.time ? new Date(worker.time).toLocaleTimeString() : '-'}
-                    </p>
-                  </div>
-                  
-                  <div className="mt-3">
-                    {worker.status === 'BUSY' && (
-                      <Button 
-                        variant="outline-primary" 
-                        size="sm"
-                        onClick={() => openMigrateDialog(worker)}
-                      >
-                        Task migrieren
-                      </Button>
+                    {workerTasks.length > 0 ? (
+                      <ListGroup className="mb-3">
+                        {workerTasks.map(task => (
+                          <ListGroup.Item key={task.id} className="d-flex justify-content-between align-items-center">
+                            <div>
+                              <small>{task.id.substring(0, 8)}...</small>
+                              <div className="progress mt-1" style={{ height: '8px' }}>
+                                <div 
+                                  className={`progress-bar bg-${task.status === 'FAILED' ? 'danger' : 'primary'}`} 
+                                  role="progressbar" 
+                                  style={{ width: `${task.progress}%` }} 
+                                  aria-valuenow={task.progress} 
+                                  aria-valuemin="0" 
+                                  aria-valuemax="100"
+                                ></div>
+                              </div>
+                            </div>
+                            {renderTaskStatusBadge(task.status)}
+                          </ListGroup.Item>
+                        ))}
+                      </ListGroup>
+                    ) : (
+                      <div className="text-muted mb-3">Keine aktiven Tasks</div>
                     )}
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))
+                    
+                    <div className="last-update">
+                      <small className="text-muted">
+                        Letztes Update: {worker.lastSeen ? new Date(worker.lastSeen).toLocaleTimeString() : 'N/A'}
+                      </small>
+                    </div>
+                    
+                    <div className="mt-3">
+                      {worker.status === 'BUSY' && (
+                        <Button 
+                          variant="outline-primary" 
+                          size="sm"
+                          onClick={() => openMigrateDialog(worker)}
+                        >
+                          Task migrieren
+                        </Button>
+                      )}
+                    </div>
+                  </Card.Body>
+                </Card>
+              </Col>
+            );
+          })
         )}
       </Row>
 
@@ -165,7 +229,7 @@ const WorkerGrid = ({ workers, onMigrateTask, tasks }) => {
                 <option value="">Wähle einen Ziel-Worker</option>
                 {getAvailableTargetWorkers().map(worker => (
                   <option key={worker.id} value={worker.id}>
-                    {worker.id.substring(0, 8)}... ({worker.status})
+                    Worker {worker.id.replace('worker-', '')} ({worker.status})
                   </option>
                 ))}
               </Form.Select>

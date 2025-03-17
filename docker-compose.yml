@@ -38,15 +38,21 @@ services:
       context: ./task-manager
       dockerfile: Dockerfile
     depends_on:
-      - rabbitmq
-      - redis
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     ports:
       - "8080:8080"
     environment:
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
       - REDIS_URL=redis:6379
-    volumes:
-      - ./task-manager:/app
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/tasks"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # Worker-Knoten (3 Instanzen)
   worker-node-1:
@@ -54,45 +60,39 @@ services:
       context: ./worker-node
       dockerfile: Dockerfile
     depends_on:
-      - rabbitmq
-      - redis
-      - task-manager
+      task-manager:
+        condition: service_healthy
     environment:
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
       - REDIS_URL=redis:6379
       - WORKER_ID=worker-1
-    volumes:
-      - ./worker-node:/app
+    restart: on-failure
 
   worker-node-2:
     build:
       context: ./worker-node
       dockerfile: Dockerfile
     depends_on:
-      - rabbitmq
-      - redis
-      - task-manager
+      task-manager:
+        condition: service_healthy
     environment:
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
       - REDIS_URL=redis:6379
       - WORKER_ID=worker-2
-    volumes:
-      - ./worker-node:/app
+    restart: on-failure
 
   worker-node-3:
     build:
       context: ./worker-node
       dockerfile: Dockerfile
     depends_on:
-      - rabbitmq
-      - redis
-      - task-manager
+      task-manager:
+        condition: service_healthy
     environment:
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
       - REDIS_URL=redis:6379
       - WORKER_ID=worker-3
-    volumes:
-      - ./worker-node:/app
+    restart: on-failure
 
   # Frontend
   frontend:
@@ -105,9 +105,11 @@ services:
       - ./frontend:/app
       - /app/node_modules
     depends_on:
-      - task-manager
+      task-manager:
+        condition: service_healthy
     environment:
       - REACT_APP_API_URL=http://localhost:8080
+    restart: on-failure
 
 volumes:
   rabbitmq_data:
