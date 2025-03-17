@@ -1,0 +1,177 @@
+.task-control-center {
+  margin-bottom: 20px;
+}
+
+.dashboard-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.dashboard-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.dashboard-card .card-header {
+  background-color: #1A2634;
+  color: white;
+  font-weight: 600;
+  padding: 15px 20px;
+}
+
+.dashboard-stats {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin-top: 10px;
+}
+
+@media (min-width: 576px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.stat-item {
+  text-align: center;
+  background: white;
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #4A90E2;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.high-priority-tasks {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.priority-task-item {
+  background: white;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.priority-task-item:last-child {
+  margin-bottom: 0;
+}
+
+.task-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.task-id {
+  font-family: monospace;
+  color: #495057;
+}
+
+.task-creator {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  height: 100%;
+}
+
+.task-type-selector {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.type-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.type-option:first-child {
+  margin-left: 0;
+}
+
+.type-option:last-child {
+  margin-right: 0;
+}
+
+.type-option i {
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+  color: #6c757d;
+}
+
+.type-option span {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.type-option.selected {
+  background-color: #4A90E2;
+  color: white;
+  box-shadow: 0 4px 8px rgba(74, 144, 226, 0.3);
+}
+
+.type-option.selected i,
+.type-option.selected span {
+  color: white;
+}
+
+.code-textarea {
+  font-family: monospace;
+  font-size: 0.9rem;
+}
+
+/* Für Tooltips und Erklärungen */
+.info-tooltip {
+  cursor: help;
+  color: #6c757d;
+  margin-left: 5px;
+}
+
+.info-tooltip:hover {
+  color: #4A90E2;
+}
+
+/* Animationen für Gamification */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.task-created-animation {
+  animation: pulse 1s;
+}
