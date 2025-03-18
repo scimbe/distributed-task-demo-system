@@ -108,7 +108,7 @@ services:
       task-manager:
         condition: service_healthy
     environment:
-      - REACT_APP_API_URL=http://localhost:8080
+      - REACT_APP_API_URL=http://task-manager:8080
     restart: on-failure
 
 volumes:

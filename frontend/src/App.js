@@ -94,6 +94,9 @@ function App() {
           case 'task_migration':
             addEvent(`Task ${data.taskId.substring(0, 8)}... migriert von Worker ${data.content.fromWorker} zu ${data.content.toWorker}`);
             break;
+          case 'task_recovery':
+            addEvent(`Task ${data.taskId.substring(0, 8)}... wird wiederhergestellt: ${data.content.message}`);
+            break;
           case 'welcome':
             console.log('WebSocket Welcome-Nachricht:', data);
             break;
