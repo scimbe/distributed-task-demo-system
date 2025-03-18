@@ -541,5 +541,5 @@
 /* Roboter-Icon für leere Zustände */
 .robot-icon-large {
   font-size: 4rem;
-  opacity: 0.3;
+  color: #bdc3c7;
 }
