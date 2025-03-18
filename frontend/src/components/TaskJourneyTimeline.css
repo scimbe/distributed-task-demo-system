@@ -1,0 +1,330 @@
+.task-journey-timeline {
+  margin-bottom: 20px;
+}
+
+.timeline-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.timeline-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.timeline-card .card-header {
+  background-color: #1A2634;
+  color: white;
+  font-weight: 600;
+  padding: 15px 20px;
+}
+
+/* Tabs */
+.timeline-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.timeline-tab {
+  font-size: 0.9rem;
+  padding: 6px 12px;
+  white-space: nowrap;
+}
+
+/* Legend */
+.timeline-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.legend-marker {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
+.legend-marker.created {
+  background-color: #aed6f1;
+}
+
+.legend-marker.assigned {
+  background-color: #5dade2;
+}
+
+.legend-marker.running {
+  background-color: #3498db;
+}
+
+.legend-marker.completed {
+  background-color: #2ecc71;
+}
+
+/* Task Liste */
+.tasks-list {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.task-item {
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-left: 4px solid transparent;
+}
+
+.task-item:hover {
+  background-color: #f8f9fa;
+}
+
+.task-item.selected {
+  background-color: #e3f2fd;
+  border-left-color: #4A90E2;
+}
+
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.task-title {
+  display: flex;
+  align-items: center;
+}
+
+.status-icon {
+  font-size: 1.5rem;
+  margin-right: 10px;
+}
+
+.task-info {
+  flex: 1;
+}
+
+.task-id {
+  margin: 0;
+  font-size: 0.9rem;
+  font-family: monospace;
+}
+
+.task-type {
+  color: #6c757d;
+}
+
+/* Task Journey */
+.task-journey {
+  display: flex;
+  align-items: center;
+  margin: 20px 0;
+  position: relative;
+}
+
+.journey-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 25%;
+}
+
+.step-indicator {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #e9ecef;
+  border: 2px solid #ced4da;
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+.journey-step.active .step-indicator {
+  background-color: #4A90E2;
+  border-color: #2980b9;
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+}
+
+.journey-step.active.failed .step-indicator {
+  background-color: #e74c3c;
+  border-color: #c0392b;
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
+}
+
+.step-label {
+  font-size: 0.75rem;
+  margin-top: 5px;
+  color: #6c757d;
+  text-align: center;
+}
+
+.journey-step.active .step-label {
+  color: #4A90E2;
+  font-weight: 500;
+}
+
+.journey-step.active.failed .step-label {
+  color: #e74c3c;
+}
+
+.step-time, .step-progress {
+  font-size: 0.7rem;
+  margin-top: 3px;
+  color: #6c757d;
+}
+
+.journey-connector {
+  flex: 1;
+  height: 3px;
+  background-color: #e9ecef;
+  z-index: 1;
+}
+
+.journey-connector.active {
+  background-color: #4A90E2;
+}
+
+/* Task Details */
+.task-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-bottom: 10px;
+}
+
+.worker-info, .task-timestamp {
+  display: flex;
+  align-items: center;
+}
+
+.worker-info i, .task-timestamp i {
+  margin-right: 5px;
+}
+
+.status-description {
+  font-size: 0.8rem;
+  color: #6c757d;
+  background-color: #f8f9fa;
+  padding: 8px;
+  border-radius: 4px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.status-description i {
+  margin-right: 8px;
+  margin-top: 3px;
+  color: #4A90E2;
+}
+
+/* Empty state */
+.no-tasks-message {
+  text-align: center;
+  padding: 40px 0;
+  color: #6c757d;
+}
+
+.no-tasks-message i {
+  font-size: 3rem;
+  margin-bottom: 10px;
+  display: block;
+}
+
+/* Responsive Design Anpassungen */
+@media (max-width: 768px) {
+  .timeline-tabs {
+    overflow-x: auto;
+    padding-bottom: 5px;
+    flex-wrap: nowrap;
+  }
+  
+  .task-journey {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .journey-step {
+    width: 100%;
+    flex-direction: row;
+    padding: 10px 0;
+    justify-content: flex-start;
+  }
+  
+  .step-indicator {
+    margin-right: 15px;
+  }
+  
+  .step-label {
+    margin-top: 0;
+    margin-right: 10px;
+    text-align: left;
+  }
+  
+  .step-time, .step-progress {
+    margin-top: 0;
+    margin-left: auto;
+  }
+  
+  .journey-connector {
+    width: 3px;
+    height: 20px;
+    margin-left: 8px;
+  }
+  
+  .task-header {
+    flex-direction: column;
+  }
+  
+  .task-header .badge {
+    align-self: flex-start;
+    margin-top: 10px;
+  }
+}
+
+/* Animationen */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.journey-step.active:last-child .step-indicator {
+  animation: pulse 2s infinite;
+}
+
+/* Task-Status spezifische Styles */
+.task-item[data-status="RUNNING"] .task-journey {
+  position: relative;
+}
+
+.task-item[data-status="RUNNING"] .step-progress {
+  font-weight: bold;
+  color: #4A90E2;
+}
