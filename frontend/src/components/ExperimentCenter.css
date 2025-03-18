@@ -1,0 +1,308 @@
+.experiment-center {
+  margin-bottom: 20px;
+}
+
+.experiment-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.experiment-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.experiment-card .card-header {
+  background-color: #1A2634;
+  color: white;
+  font-weight: 600;
+  padding: 15px 20px;
+}
+
+/* Experiment Liste */
+.experiment-list {
+  margin-bottom: 20px;
+}
+
+.experiment-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+@media (min-width: 768px) {
+  .experiment-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .experiment-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.experiment-item {
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+  display: flex;
+}
+
+.experiment-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-3px);
+}
+
+.experiment-item.selected {
+  border-color: #4A90E2;
+  background-color: rgba(74, 144, 226, 0.05);
+}
+
+.experiment-icon {
+  flex: 0 0 40px;
+  height: 40px;
+  background-color: #f8f9fa;
+  border-radius: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 15px;
+  font-size: 1.2rem;
+  color: #4A90E2;
+}
+
+.experiment-item.selected .experiment-icon {
+  background-color: #4A90E2;
+  color: white;
+}
+
+.experiment-content {
+  flex: 1;
+}
+
+.experiment-content h6 {
+  margin: 0 0 5px 0;
+  font-size: 0.95rem;
+}
+
+.experiment-tags {
+  margin-bottom: 8px;
+}
+
+.experiment-description {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.experiment-duration {
+  color: #6c757d;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+}
+
+/* Experiment Details */
+.experiment-details {
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  height: 100%;
+}
+
+.experiment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.experiment-header h5 {
+  margin: 0;
+}
+
+.experiment-badges {
+  display: flex;
+}
+
+.experiment-full-description {
+  color: #495057;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.experiment-info {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.info-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  color: #6c757d;
+  font-size: 0.85rem;
+}
+
+.info-item i {
+  margin-right: 8px;
+  color: #4A90E2;
+}
+
+.experiment-steps {
+  padding-left: 20px;
+  margin-bottom: 0;
+}
+
+.experiment-steps li {
+  margin-bottom: 8px;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.experiment-steps li:last-child {
+  margin-bottom: 0;
+}
+
+/* No Experiment Selected */
+.no-experiment-selected {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+  color: #adb5bd;
+  padding: 50px 20px;
+}
+
+.no-experiment-selected i {
+  font-size: 3rem;
+  margin-bottom: 15px;
+}
+
+.no-experiment-selected p {
+  margin: 0;
+}
+
+/* Progress Container */
+.experiment-progress-container {
+  margin-top: 20px;
+}
+
+.progress-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-left: 5px solid #4A90E2;
+}
+
+.progress-card h6 {
+  display: flex;
+  align-items: center;
+  color: #495057;
+}
+
+.progress-card h6 i {
+  color: #4A90E2;
+}
+
+.completed-steps {
+  margin-top: 15px;
+}
+
+.step-alert {
+  display: flex;
+  align-items: flex-start;
+  padding: 10px 15px;
+  margin-bottom: 8px;
+  background-color: rgba(74, 144, 226, 0.1);
+  border-color: rgba(74, 144, 226, 0.2);
+  color: #4A90E2;
+  font-size: 0.9rem;
+  animation: slideIn 0.3s ease;
+}
+
+.step-alert i {
+  margin-top: 3px;
+}
+
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Anpassungen */
+@media (max-width: 767px) {
+  .experiment-header {
+    flex-direction: column;
+  }
+  
+  .experiment-badges {
+    margin-top: 8px;
+  }
+  
+  .experiment-info {
+    flex-direction: column;
+  }
+  
+  .info-item {
+    margin-bottom: 8px;
+  }
+  
+  .info-item:last-child {
+    margin-bottom: 0;
+  }
+  
+  .experiment-details {
+    margin-top: 20px;
+  }
+}
+
+/* Accordion Anpassungen */
+.experiment-details .accordion-button:not(.collapsed) {
+  background-color: rgba(74, 144, 226, 0.1);
+  color: #4A90E2;
+}
+
+.experiment-details .accordion-button:focus {
+  box-shadow: 0 0 0 0.25rem rgba(74, 144, 226, 0.25);
+}
+
+/* Gamification-Elemente */
+.experiment-item:hover .experiment-icon {
+  transform: rotate(5deg);
+}
+
+.experiment-item.selected:hover .experiment-icon {
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
