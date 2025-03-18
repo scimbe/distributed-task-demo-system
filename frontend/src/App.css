@@ -1,32 +1,72 @@
 .app-container {
   padding: 20px;
   background-color: #f5f6fa;
-  min-height: 100vh;
+  min-height: calc(100vh - 56px);
+}
+
+.navbar-brand {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.navbar-nav .nav-link {
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  transition: color 0.2s ease;
+}
+
+.navbar-nav .nav-link.active {
+  color: #4A90E2 !important;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
 }
 
 .visualizer-container {
   background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   padding: 20px;
   margin-bottom: 20px;
+  transition: all 0.3s ease;
+}
+
+.visualizer-container:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.visualizer-container h5 {
+  margin-bottom: 15px;
+  color: #1A2634;
+  font-weight: 600;
 }
 
 .control-panel {
   background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   padding: 20px;
   margin-bottom: 20px;
+  transition: all 0.3s ease;
+}
+
+.control-panel:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
 }
 
 .events-container {
   background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   padding: 10px;
   max-height: 300px;
   overflow-y: auto;
+  transition: all 0.3s ease;
+}
+
+.events-container:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
 .event-item {
@@ -34,6 +74,11 @@
   border-bottom: 1px solid #eee;
   font-size: 0.9rem;
   display: flex;
+  transition: background-color 0.2s ease;
+}
+
+.event-item:hover {
+  background-color: #f8f9fa;
 }
 
 .event-item:last-child {
@@ -44,6 +89,8 @@
   color: #6c757d;
   margin-right: 10px;
   white-space: nowrap;
+  font-family: monospace;
+  font-size: 0.8rem;
 }
 
 .event-message {
@@ -52,10 +99,110 @@
 
 h1, h2, h3, h4, h5, h6 {
   margin-bottom: 20px;
+  color: #1A2634;
 }
 
-h2 {
-  font-size: 1.5rem;
-  color: #343a40;
-  margin-bottom: 15px;
+h5 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* Scrollbar Anpassungen */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Mobile Anpassungen */
+@media (max-width: 768px) {
+  .app-container {
+    padding: 15px;
+  }
+  
+  .visualizer-container, .control-panel, .events-container {
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+  
+  h5 {
+    font-size: 1rem;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.app-container {
+  animation: fadeIn 0.5s ease;
+}
+
+/* Status Badge Anpassungen */
+.badge {
+  font-weight: 500;
+  padding: 0.35em 0.65em;
+  border-radius: 4px;
+}
+
+/* Toast Benachrichtigungen */
+.toast {
+  background-color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+}
+
+.toast-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+/* Progress-Bars */
+.progress {
+  height: 0.5rem;
+  border-radius: 0.25rem;
+  background-color: #e9ecef;
+}
+
+.progress-bar {
+  background-color: #4A90E2;
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: #4A90E2;
+  border-color: #4A90E2;
+}
+
+.btn-primary:hover {
+  background-color: #3a80d2;
+  border-color: #3a80d2;
+}
+
+.btn-outline-primary {
+  color: #4A90E2;
+  border-color: #4A90E2;
+}
+
+.btn-outline-primary:hover {
+  background-color: #4A90E2;
+  border-color: #4A90E2;
 }
