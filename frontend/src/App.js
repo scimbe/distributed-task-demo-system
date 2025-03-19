@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import TaskList from './components/TaskList';
-import WorkerGrid from './components/WorkerGrid';
 import TaskDetail from './components/TaskDetail';
 import SystemVisualizer from './components/SystemVisualizer';
+import WorkerRobotWorkshop from './components/WorkerRobotWorkshop';
 import { Container, Row, Col, Button, Form, Alert, Badge } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -633,6 +633,17 @@ function App() {
       </Row>
       
       <Row className="mt-4">
+        <Col>
+          <WorkerRobotWorkshop 
+            workers={workers} 
+            onMigrateTask={migrateTask}
+            tasks={tasks}
+            key={`workers-${lastRefresh.getTime()}`}
+          />
+        </Col>
+      </Row>
+      
+      <Row className="mt-4">
         <Col md={6}>
           <h2>Tasks</h2>
           <TaskList 
@@ -644,18 +655,6 @@ function App() {
         </Col>
         
         <Col md={6}>
-          <h2>Worker</h2>
-          <WorkerGrid 
-            workers={workers} 
-            onMigrateTask={migrateTask}
-            tasks={tasks}
-            key={`workers-${lastRefresh.getTime()}`}
-          />
-        </Col>
-      </Row>
-      
-      <Row className="mt-4">
-        <Col>
           <h2>System-Ereignisse</h2>
           <div className="events-container">
             {events.length > 0 ? (

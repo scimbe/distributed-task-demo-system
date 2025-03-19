@@ -154,6 +154,7 @@ const WorkerRobotWorkshop = ({ workers, tasks, onMigrateTask }) => {
                     <div 
                       className={`robot-card ${worker.status.toLowerCase()}`}
                       style={{ borderColor: getStatusColor(worker.status) }}
+                      data-status={worker.status}
                     >
                       <div className="robot-header">
                         <h6>{worker.id.replace('worker-', 'Worker ')}</h6>
@@ -219,7 +220,9 @@ const WorkerRobotWorkshop = ({ workers, tasks, onMigrateTask }) => {
                             variant="outline-warning" 
                             size="sm"
                             onClick={() => openMigrateDialog(worker)}
+                            className="migrate-button"
                           >
+                            <i className="bi bi-arrow-left-right me-1"></i>
                             Task migrieren
                           </Button>
                         )}
@@ -231,7 +234,11 @@ const WorkerRobotWorkshop = ({ workers, tasks, onMigrateTask }) => {
                           {workerTasks.length > 0 ? (
                             <ListGroup className="task-list">
                               {workerTasks.map(task => (
-                                <ListGroup.Item key={task.id} className="task-item">
+                                <ListGroup.Item 
+                                  key={task.id} 
+                                  className="task-item"
+                                  data-status={task.status}
+                                >
                                   <div className="task-header">
                                     <span className="task-id">{task.id.substring(0, 8)}...</span>
                                     <Badge bg={getTaskStatusVariant(task.status)}>{task.status}</Badge>
@@ -239,13 +246,15 @@ const WorkerRobotWorkshop = ({ workers, tasks, onMigrateTask }) => {
                                   <div className="task-progress">
                                     <div className="progress">
                                       <div 
-                                        className={`progress-bar progress-bar-striped ${task.status === 'RUNNING' ? 'progress-bar-animated' : ''}`}
+                                        className={`progress-bar progress-bar-striped ${task.status === 'RUNNING' || task.status === 'MIGRATING' || task.status === 'RECOVERING' ? 'progress-bar-animated' : ''}`}
                                         role="progressbar" 
                                         style={{ 
                                           width: `${task.progress}%`,
                                           backgroundColor: 
                                             task.status === 'COMPLETED' ? '#2ecc71' : 
                                             task.status === 'FAILED' ? '#e74c3c' : 
+                                            task.status === 'MIGRATING' ? '#f39c12' :
+                                            task.status === 'RECOVERING' ? '#9b59b6' :
                                             '#4a90e2'
                                         }} 
                                         aria-valuenow={task.progress} 
@@ -260,6 +269,19 @@ const WorkerRobotWorkshop = ({ workers, tasks, onMigrateTask }) => {
                                     <small>Typ: {task.type}</small>
                                     <small>Priorität: {task.priority}</small>
                                   </div>
+                                  
+                                  {/* Status-spezifische Icons */}
+                                  {task.status === 'MIGRATING' && (
+                                    <div className="task-status-icon migration-icon">
+                                      <i className="bi bi-arrow-left-right"></i>
+                                    </div>
+                                  )}
+                                  
+                                  {task.status === 'RECOVERING' && (
+                                    <div className="task-status-icon recovering-icon">
+                                      <i className="bi bi-arrow-counterclockwise"></i>
+                                    </div>
+                                  )}
                                 </ListGroup.Item>
                               ))}
                             </ListGroup>
@@ -381,6 +403,7 @@ const WorkerRobotWorkshop = ({ workers, tasks, onMigrateTask }) => {
             onClick={handleMigrateTask}
             disabled={!selectedTask || !targetWorker}
           >
+            <i className="bi bi-arrow-left-right me-1"></i>
             Task migrieren
           </Button>
         </Modal.Footer>

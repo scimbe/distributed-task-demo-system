@@ -25,11 +25,29 @@ const SystemVisualizer = ({ tasks, workers, selectedTask }) => {
     SHUTDOWN: '#95a5a6'    // Grau
   };
 
+  // Hilfsfunktion zum Erstellen eines Pfades zwischen Punkten
+  const createPathBetweenPoints = (source, target) => {
+    const dx = target.x - source.x;
+    const dy = target.y - source.y;
+    return `M${source.x},${source.y}C${source.x},${source.y + dy/3} ${target.x},${target.y - dy/3} ${target.x},${target.y}`;
+  };
+
+  // Hilfsfunktion für Animation entlang eines Pfades
+  const translateAlong = (path) => {
+    const l = path.getTotalLength();
+    return function(d, i) {
+      return function(t) {
+        const p = path.getPointAtLength(t * l);
+        return `translate(${p.x},${p.y})`;
+      };
+    };
+  };
+
   useEffect(() => {
     if (!svgRef.current || Object.keys(workers).length === 0) return;
 
     const width = svgRef.current.parentElement.clientWidth;
-    const height = 500;
+    const height = 600; // Erhöht für die Baumstruktur
 
     // SVG erstellen
     const svg = d3.select(svgRef.current)
@@ -43,19 +61,19 @@ const SystemVisualizer = ({ tasks, workers, selectedTask }) => {
 
     // Container für die Visualisierung
     const visualContainer = svg.append('g')
-      .attr('transform', `translate(${width / 2}, ${height / 2})`);
+      .attr('transform', `translate(${width / 2}, 80)`); // Verschoben nach oben
 
     // Hintergrund
     visualContainer.append('rect')
       .attr('x', -width / 2)
-      .attr('y', -height / 2)
+      .attr('y', -80)
       .attr('width', width)
       .attr('height', height)
       .attr('fill', '#f8f9fa')
       .attr('rx', 10)
       .attr('ry', 10);
 
-    // Task-Manager in der Mitte
+    // Task-Manager in der Mitte oben
     const managerRadius = 50;
     visualContainer.append('circle')
       .attr('cx', 0)
@@ -77,18 +95,26 @@ const SystemVisualizer = ({ tasks, workers, selectedTask }) => {
     const workerArray = Array.isArray(workers) ? workers : Object.values(workers);
     const workerCount = workerArray.length;
     const workerRadius = 70;
-    const visualRadius = Math.min(width, height) * 0.4 - workerRadius;
     
-    // Worker-Boxen
+    // Horizontale Ausbreitung der Worker
+    const horizontalSpacing = width / (workerCount + 1);
+    
+    // Speichert die Worker-Positionen für den Migrationspfad
+    const workerPositions = {};
+    
+    // Worker-Boxen - horizontal angeordnet unterhalb des Task-Managers
     workerArray.forEach((worker, index) => {
-      const angle = (index * 2 * Math.PI / workerCount) + Math.PI/2;
-      const x = visualRadius * Math.cos(angle);
-      const y = visualRadius * Math.sin(angle);
+      const x = (index + 1) * horizontalSpacing - width / 2; // Horizontal verteilt
+      const y = 250; // Alle Worker auf derselben Höhe
+      
+      // Speichere Worker-Position für spätere Verwendung
+      workerPositions[worker.id] = { x, y };
       
       // Worker-Box
       const workerGroup = visualContainer.append('g')
         .attr('class', 'worker-box')
-        .attr('transform', `translate(${x}, ${y})`);
+        .attr('transform', `translate(${x}, ${y})`)
+        .attr('data-worker-id', worker.id);
       
       // Box
       workerGroup.append('rect')
@@ -101,6 +127,7 @@ const SystemVisualizer = ({ tasks, workers, selectedTask }) => {
         .attr('fill', workerStatusColors[worker.status] || '#95a5a6')
         .attr('stroke', '#2c3e50')
         .attr('stroke-width', 2)
+        .attr('class', 'worker-rect')
         .on('mouseover', function(event) {
           tooltip
             .style('opacity', 1)
@@ -133,15 +160,63 @@ const SystemVisualizer = ({ tasks, workers, selectedTask }) => {
         .attr('fill', 'white')
         .text(worker.status);
       
-      // Verbindung zum Task-Manager
-      visualContainer.append('line')
-        .attr('x1', 0)
-        .attr('y1', 0)
-        .attr('x2', x)
-        .attr('y2', y)
-        .attr('stroke', '#95a5a6')
-        .attr('stroke-width', 2)
-        .attr('stroke-dasharray', '5,5');
+      // Verbindung zum Task-Manager - kurvenförmig
+      const path = createPathBetweenPoints({x: 0, y: 0}, {x: x, y: y});
+      visualContainer.append('path')
+        .attr('d', path)
+        .attr('fill', 'none')
+        .attr('stroke', worker.status === 'FAILING' ? '#e74c3c' : '#95a5a6')
+        .attr('stroke-width', worker.status === 'FAILING' ? 3 : 2)
+        .attr('stroke-dasharray', worker.status === 'FAILING' ? '8,4' : '5,5')
+        .attr('class', 'connection-line');
+      
+      // Spezielle Effekte für FAILING Worker
+      if (worker.status === 'FAILING') {
+        // Pulsierender Kreis für FAILING Worker
+        workerGroup.append('circle')
+          .attr('cx', 0)
+          .attr('cy', 0)
+          .attr('r', workerRadius * 1.1)
+          .attr('fill', 'none')
+          .attr('stroke', '#e74c3c')
+          .attr('stroke-width', 3)
+          .attr('stroke-dasharray', '10,5')
+          .attr('class', 'failing-indicator')
+          .call(g => {
+            // Pulsierende Animation
+            g.append('animate')
+              .attr('attributeName', 'r')
+              .attr('values', `${workerRadius * 1.1};${workerRadius * 1.3};${workerRadius * 1.1}`)
+              .attr('dur', '2s')
+              .attr('repeatCount', 'indefinite');
+            
+            // Rotation der gestrichelten Linie
+            g.append('animateTransform')
+              .attr('attributeName', 'transform')
+              .attr('type', 'rotate')
+              .attr('from', '0 0 0')
+              .attr('to', '360 0 0')
+              .attr('dur', '8s')
+              .attr('repeatCount', 'indefinite');
+          });
+        
+        // Warnsymbol
+        workerGroup.append('text')
+          .attr('x', 0)
+          .attr('y', -workerRadius * 0.2)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', '24px')
+          .attr('fill', 'white')
+          .text('⚠')
+          .call(g => {
+            // Blinkende Animation
+            g.append('animate')
+              .attr('attributeName', 'opacity')
+              .attr('values', '1;0.3;1')
+              .attr('dur', '1s')
+              .attr('repeatCount', 'indefinite');
+          });
+      }
       
       // Tasks für diesen Worker
       const workerTasks = tasks.filter(task => task.worker_id === worker.id || task.workerId === worker.id);
@@ -155,10 +230,14 @@ const SystemVisualizer = ({ tasks, workers, selectedTask }) => {
           
           const isSelected = selectedTask && (selectedTask.id === task.id);
           
+          // Task-Gruppe
+          const taskGroup = workerGroup.append('g')
+            .attr('class', 'task-group')
+            .attr('transform', `translate(${taskX}, 0)`)
+            .attr('data-task-id', task.id);
+          
           // Task-Kreis
-          workerGroup.append('circle')
-            .attr('cx', taskX)
-            .attr('cy', 0)
+          taskGroup.append('circle')
             .attr('r', isSelected ? taskSize * 0.75 : taskSize * 0.6)
             .attr('fill', statusColors[task.status] || '#95a5a6')
             .attr('stroke', isSelected ? '#f1c40f' : '#2c3e50')
@@ -187,53 +266,341 @@ const SystemVisualizer = ({ tasks, workers, selectedTask }) => {
               .startAngle(0)
               .endAngle(2 * Math.PI * (task.progress / 100));
             
-            workerGroup.append('path')
+            taskGroup.append('path')
               .attr('d', arc)
-              .attr('fill', '#f1c40f')
-              .attr('transform', `translate(${taskX}, 0)`);
+              .attr('fill', '#f1c40f');
+          }
+          
+          // Animation für migrierende Tasks
+          if (task.status === 'MIGRATING') {
+            taskGroup.select('circle')
+              .call(g => {
+                // Pulsierende Animation
+                g.append('animate')
+                  .attr('attributeName', 'r')
+                  .attr('values', `${taskSize * 0.6};${taskSize * 0.8};${taskSize * 0.6}`)
+                  .attr('dur', '1s')
+                  .attr('repeatCount', 'indefinite');
+                
+                // Farbwechsel
+                g.append('animate')
+                  .attr('attributeName', 'fill')
+                  .attr('values', `${statusColors.MIGRATING};${statusColors.RUNNING};${statusColors.MIGRATING}`)
+                  .attr('dur', '2s')
+                  .attr('repeatCount', 'indefinite');
+              });
+          }
+          
+          // Animation für wiederherzustellende Tasks
+          if (task.status === 'RECOVERING') {
+            taskGroup.select('circle')
+              .attr('stroke', statusColors.RECOVERING)
+              .attr('stroke-width', 3)
+              .call(g => {
+                // Pulsierende Animation
+                g.append('animate')
+                  .attr('attributeName', 'stroke-width')
+                  .attr('values', '3;5;3')
+                  .attr('dur', '1.5s')
+                  .attr('repeatCount', 'indefinite');
+              });
+            
+            // Hinzufügen eines "Wiederherstellungs"-Symbols
+            taskGroup.append('text')
+              .attr('y', 5)
+              .attr('text-anchor', 'middle')
+              .attr('font-size', '16px')
+              .attr('fill', 'white')
+              .text('↻')
+              .call(g => {
+                // Rotationsanimation
+                g.append('animateTransform')
+                  .attr('attributeName', 'transform')
+                  .attr('type', 'rotate')
+                  .attr('from', '0')
+                  .attr('to', '360')
+                  .attr('dur', '2s')
+                  .attr('repeatCount', 'indefinite');
+              });
+          }
+          
+          // Animation für fehlgeschlagene Tasks mit Wiederaufnahme-Option
+          if (task.status === 'FAILED') {
+            taskGroup.select('circle')
+              .attr('stroke', statusColors.FAILED)
+              .attr('stroke-width', 3)
+              .call(g => {
+                // Pulsierende Animation
+                g.append('animate')
+                  .attr('attributeName', 'stroke-width')
+                  .attr('values', '3;5;3')
+                  .attr('dur', '2s')
+                  .attr('repeatCount', 'indefinite');
+              });
+            
+            // X-Symbol für Fehler
+            taskGroup.append('text')
+              .attr('y', 5)
+              .attr('text-anchor', 'middle')
+              .attr('font-size', '16px')
+              .attr('fill', 'white')
+              .text('✗');
+              
+            // "Retry"-Symbol hinzufügen
+            taskGroup.append('circle')
+              .attr('r', taskSize * 0.3)
+              .attr('cx', taskSize * 0.6)
+              .attr('cy', -taskSize * 0.6)
+              .attr('fill', '#27ae60')
+              .attr('stroke', 'white')
+              .attr('stroke-width', 1)
+              .attr('class', 'retry-button')
+              .attr('cursor', 'pointer');
+              
+            taskGroup.append('text')
+              .attr('x', taskSize * 0.6)
+              .attr('y', -taskSize * 0.6)
+              .attr('text-anchor', 'middle')
+              .attr('dominant-baseline', 'middle')
+              .attr('font-size', '10px')
+              .attr('fill', 'white')
+              .text('↻')
+              .attr('class', 'retry-icon')
+              .attr('cursor', 'pointer');
           }
         });
       }
     });
     
-    // Nicht zugewiesene Tasks werden um den Task-Manager angeordnet
+    // Migration-Pfade anzeigen für Tasks im Status MIGRATING
+    const migratingTasks = tasks.filter(task => task.status === 'MIGRATING');
+    migratingTasks.forEach(task => {
+      // Finde den Quell- und Ziel-Worker aus den Task-Daten
+      // In einer realen Anwendung würden diese Informationen aus den Task-Daten kommen
+      // Hier verwenden wir eine Heuristik zur Demonstration
+      const sourceWorkerId = task.worker_id || Object.keys(workerPositions)[0];
+      
+      // Als Ziel nehmen wir einen aktiven Worker, der nicht der Quell-Worker ist
+      const availableWorkers = workerArray.filter(w => 
+        w.id !== sourceWorkerId && w.status !== 'FAILING' && w.status !== 'SHUTDOWN'
+      );
+      
+      const targetWorkerId = availableWorkers.length > 0 
+        ? availableWorkers[0].id 
+        : Object.keys(workerPositions).find(id => id !== sourceWorkerId);
+      
+      if (sourceWorkerId && targetWorkerId && workerPositions[sourceWorkerId] && workerPositions[targetWorkerId]) {
+        const sourcePos = workerPositions[sourceWorkerId];
+        const targetPos = workerPositions[targetWorkerId];
+        
+        // Migrationspfad erstellen - kurvenförmig
+        const pathData = createPathBetweenPoints(sourcePos, targetPos);
+        
+        // Pfad zeichnen
+        const migrationPath = visualContainer.append('path')
+          .attr('d', pathData)
+          .attr('fill', 'none')
+          .attr('stroke', statusColors.MIGRATING)
+          .attr('stroke-width', 3)
+          .attr('stroke-dasharray', '8,4')
+          .attr('class', 'migration-path');
+        
+        // Animation des Pfades
+        migrationPath.call(g => {
+          g.append('animate')
+            .attr('attributeName', 'stroke-dashoffset')
+            .attr('from', '0')
+            .attr('to', '24')
+            .attr('dur', '1.5s')
+            .attr('repeatCount', 'indefinite');
+        });
+        
+        // Task-Symbol, das entlang des Pfades wandert
+        const migrationSymbol = visualContainer.append('circle')
+          .attr('r', 8)
+          .attr('fill', statusColors.MIGRATING)
+          .attr('stroke', '#2c3e50')
+          .attr('stroke-width', 2)
+          .attr('class', 'migration-symbol');
+        
+        // Animation des Symbols entlang des Pfades
+        migrationSymbol.call(g => {
+          g.append('animateMotion')
+            .attr('dur', '3s')
+            .attr('repeatCount', 'indefinite')
+            .attr('path', pathData);
+        });
+      }
+    });
+    
+    // Verbesserte Warteschlange für nicht zugewiesene Tasks
     const unassignedTasks = tasks.filter(task => 
       !task.worker_id && !task.workerId && task.status === 'CREATED'
     );
     
     if (unassignedTasks.length > 0) {
-      const queueLabel = visualContainer.append('text')
-        .attr('x', 0)
-        .attr('y', managerRadius + 20)
-        .attr('text-anchor', 'middle')
-        .attr('font-weight', 'bold')
-        .text('Warteschlange');
+      // Erstelle eine visuelle Warteschlange
+      const queueWidth = 200;
+      const queueHeight = 120;
+      const queueX = 0;
+      const queueY = managerRadius + 40;
       
-      const queueRadius = 30;
-      const queueCircle = visualContainer.append('circle')
-        .attr('cx', 0)
-        .attr('cy', managerRadius + 50)
-        .attr('r', queueRadius)
+      // Container für die Warteschlange
+      const queueGroup = visualContainer.append('g')
+        .attr('class', 'task-queue')
+        .attr('transform', `translate(${queueX}, ${queueY})`);
+      
+      // Hintergrund der Warteschlange
+      queueGroup.append('rect')
+        .attr('x', -queueWidth/2)
+        .attr('y', 0)
+        .attr('width', queueWidth)
+        .attr('height', queueHeight)
+        .attr('rx', 8)
+        .attr('ry', 8)
         .attr('fill', '#ecf0f1')
         .attr('stroke', '#bdc3c7')
         .attr('stroke-width', 2);
       
-      const queueText = visualContainer.append('text')
+      // "Warteschlange"-Label
+      queueGroup.append('text')
         .attr('x', 0)
-        .attr('y', managerRadius + 50)
+        .attr('y', -10)
         .attr('text-anchor', 'middle')
-        .attr('dominant-baseline', 'middle')
         .attr('font-weight', 'bold')
-        .text(unassignedTasks.length);
+        .attr('font-size', '14px')
+        .text('Warteschlange');
       
-      // Verbindung zur Warteschlange
-      visualContainer.append('line')
-        .attr('x1', 0)
-        .attr('y1', managerRadius)
-        .attr('x2', 0)
-        .attr('y2', managerRadius + 30)
-        .attr('stroke', '#bdc3c7')
-        .attr('stroke-width', 2);
+      // Tasks in der Warteschlange anzeigen
+      const taskRadius = 15;
+      const tasksPerRow = 5;
+      const rowHeight = 40;
+      
+      unassignedTasks.slice(0, 15).forEach((task, index) => {
+        const row = Math.floor(index / tasksPerRow);
+        const col = index % tasksPerRow;
+        
+        const taskX = (col - Math.floor(tasksPerRow/2)) * (taskRadius * 2.5);
+        const taskY = row * rowHeight + 30;
+        
+        const isSelected = selectedTask && (selectedTask.id === task.id);
+        
+        // Task-Kreis
+        const taskGroup = queueGroup.append('g')
+          .attr('class', 'queue-task')
+          .attr('transform', `translate(${taskX}, ${taskY})`)
+          .attr('data-task-id', task.id);
+          
+        taskGroup.append('circle')
+          .attr('r', taskRadius)
+          .attr('fill', statusColors.CREATED)
+          .attr('stroke', isSelected ? '#f1c40f' : '#2c3e50')
+          .attr('stroke-width', isSelected ? 3 : 1)
+          .on('mouseover', function(event) {
+            tooltip
+              .style('opacity', 1)
+              .html(`
+                <div><strong>Task:</strong> ${task.id}</div>
+                <div><strong>Typ:</strong> ${task.type}</div>
+                <div><strong>Status:</strong> ${task.status}</div>
+                <div><strong>Priorität:</strong> ${task.priority}</div>
+              `)
+              .style('left', (event.pageX + 10) + 'px')
+              .style('top', (event.pageY - 20) + 'px');
+          })
+          .on('mouseout', function() {
+            tooltip.style('opacity', 0);
+          });
+          
+        // Prioritätsanzeige
+        taskGroup.append('text')
+          .attr('text-anchor', 'middle')
+          .attr('dominant-baseline', 'middle')
+          .attr('font-size', '10px')
+          .attr('font-weight', 'bold')
+          .text(task.priority);
+          
+        // Pulsierende Animation für höchste Priorität
+        if (task.priority >= 9) {
+          taskGroup.select('circle')
+            .call(g => {
+              g.append('animate')
+                .attr('attributeName', 'r')
+                .attr('values', `${taskRadius};${taskRadius * 1.2};${taskRadius}`)
+                .attr('dur', '2s')
+                .attr('repeatCount', 'indefinite');
+            });
+        }
+      });
+      
+      // Anzeige für überzählige Tasks
+      if (unassignedTasks.length > 15) {
+        queueGroup.append('text')
+          .attr('x', 0)
+          .attr('y', queueHeight - 10)
+          .attr('text-anchor', 'middle')
+          .attr('font-style', 'italic')
+          .attr('font-size', '12px')
+          .text(`+ ${unassignedTasks.length - 15} weitere`);
+      }
+      
+      // Animationen für Tasks, die gerade zugewiesen werden
+      const tasksBeingAssigned = tasks.filter(task => task.status === 'ASSIGNED');
+      
+      tasksBeingAssigned.forEach(task => {
+        // Finde den Ziel-Worker
+        const targetWorkerId = task.worker_id || task.workerId;
+        
+        if (targetWorkerId && workerPositions[targetWorkerId]) {
+          const targetPos = workerPositions[targetWorkerId];
+          
+          // Ausgangspunkt ist die Warteschlange
+          const sourcePos = { x: queueX, y: queueY + queueHeight/2 };
+          
+          // Pfad von der Warteschlange zum Worker
+          const pathData = createPathBetweenPoints(sourcePos, targetPos);
+          
+          // Pfad zeichnen (unsichtbar für die Animation)
+          const assignmentPath = visualContainer.append('path')
+            .attr('d', pathData)
+            .attr('fill', 'none')
+            .attr('stroke', 'none')
+            .attr('id', `assignment-path-${task.id}`);
+          
+          // Animiertes Task-Symbol
+          const assignmentSymbol = visualContainer.append('g')
+            .attr('class', 'assignment-group');
+            
+          assignmentSymbol.append('circle')
+            .attr('r', 10)
+            .attr('fill', statusColors.ASSIGNED)
+            .attr('stroke', '#2c3e50')
+            .attr('stroke-width', 1);
+          
+          assignmentSymbol.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('dominant-baseline', 'middle')
+            .attr('font-size', '8px')
+            .attr('font-weight', 'bold')
+            .text(task.priority);
+          
+          // Animation des Symbols entlang des Pfades
+          assignmentSymbol.append('animateMotion')
+            .attr('dur', '2s')
+            .attr('repeatCount', '1')
+            .attr('path', pathData)
+            .attr('rotate', 'auto')
+            .attr('fill', 'freeze');
+          
+          // Aufleuchten am Ende der Animation
+          assignmentSymbol.append('animate')
+            .attr('attributeName', 'opacity')
+            .attr('values', '1;1;0')
+            .attr('keyTimes', '0;0.8;1')
+            .attr('dur', '2s')
+            .attr('fill', 'freeze');
+        }
+      });
     }
     
     // Legende

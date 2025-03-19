@@ -1,7 +1,7 @@
 .system-visualizer {
   position: relative;
   width: 100%;
-  height: 500px;
+  height: 600px;
   background-color: #f8f9fa;
   border-radius: 8px;
   border: 1px solid #dee2e6;
@@ -27,14 +27,17 @@
   font-size: 12px;
 }
 
-.worker-node:hover circle {
+.worker-box:hover .worker-rect {
   stroke: #f1c40f;
   stroke-width: 3px;
+  transition: stroke-width 0.2s;
 }
 
-.task-node:hover circle {
+.task-group:hover circle, 
+.queue-task:hover circle {
   stroke: #f1c40f;
   stroke-width: 3px;
+  transition: stroke-width 0.2s;
 }
 
 .legend rect {
@@ -44,4 +47,157 @@
 
 .legend text {
   font-size: 12px;
+}
+
+/* Failing Worker Animation */
+.failing-indicator {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    stroke-width: 3px;
+  }
+  50% {
+    opacity: 0.7;
+    stroke-width: 5px;
+  }
+  100% {
+    opacity: 1;
+    stroke-width: 3px;
+  }
+}
+
+/* Migration Path Animation */
+.migration-path {
+  animation: dash 1.5s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: 24;
+  }
+}
+
+/* Migration Symbol Animation */
+.migration-symbol {
+  animation: glow 1.5s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0% {
+    filter: drop-shadow(0 0 2px rgba(243, 156, 18, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 8px rgba(243, 156, 18, 0.8));
+  }
+  100% {
+    filter: drop-shadow(0 0 2px rgba(243, 156, 18, 0.5));
+  }
+}
+
+/* Worker Failing Animation */
+.worker-box[data-status='FAILING'] .worker-rect {
+  animation: shake 0.5s infinite;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  75% {
+    transform: translateX(3px);
+  }
+}
+
+/* Task Recovering Animation */
+.task-group[data-status='RECOVERING'] circle {
+  animation: recuperate 1.5s infinite;
+}
+
+@keyframes recuperate {
+  0% {
+    filter: drop-shadow(0 0 2px rgba(155, 89, 182, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 8px rgba(155, 89, 182, 0.8));
+  }
+  100% {
+    filter: drop-shadow(0 0 2px rgba(155, 89, 182, 0.5));
+  }
+}
+
+/* Connection line animation for failing worker */
+.connection-line.failing {
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* Task Queue Animation */
+.task-queue {
+  animation: queue-pulse 3s infinite ease-in-out;
+}
+
+@keyframes queue-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 0px rgba(52, 152, 219, 0));
+  }
+  50% {
+    filter: drop-shadow(0 0 5px rgba(52, 152, 219, 0.5));
+  }
+}
+
+/* Queue Task Animation */
+.queue-task circle {
+  transition: transform 0.3s ease;
+}
+
+.queue-task:hover circle {
+  transform: scale(1.2);
+}
+
+/* Retry Button Animation */
+.retry-button, .retry-icon {
+  animation: pulse-retry 1.5s infinite;
+  opacity: 0.7;
+}
+
+.retry-button:hover, .retry-icon:hover {
+  opacity: 1;
+  cursor: pointer;
+}
+
+@keyframes pulse-retry {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* Assignment Path Animation */
+.assignment-group {
+  animation: fade-in 0.5s;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
