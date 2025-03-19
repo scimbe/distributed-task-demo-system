@@ -1,0 +1,123 @@
+.step-by-step-explainer {
+  margin-bottom: 20px;
+}
+
+.step-by-step-explainer .card-header {
+  background-color: #1A2634;
+  color: white;
+}
+
+.explanation-container {
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.explanation-card {
+  margin-bottom: 15px;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.explanation-card:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.explanation-card h6 {
+  font-weight: 600;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.explanation-content {
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.bg-warning-subtle {
+  background-color: rgba(255, 193, 7, 0.15);
+  border-left: 4px solid #ffc107;
+}
+
+.bg-danger-subtle {
+  background-color: rgba(220, 53, 69, 0.15);
+  border-left: 4px solid #dc3545;
+}
+
+.bg-success-subtle {
+  background-color: rgba(40, 167, 69, 0.15);
+  border-left: 4px solid #28a745;
+}
+
+.bg-info-subtle {
+  background-color: rgba(23, 162, 184, 0.15);
+  border-left: 4px solid #17a2b8;
+}
+
+.bg-primary-subtle {
+  background-color: rgba(0, 123, 255, 0.10);
+  border-left: 4px solid #007bff;
+}
+
+/* Animation for new events */
+.explanation-card.bg-info-subtle {
+  animation: highlight-pulse 2s;
+}
+
+@keyframes highlight-pulse {
+  0% {
+    background-color: rgba(0, 123, 255, 0.3);
+  }
+  100% {
+    background-color: rgba(23, 162, 184, 0.15);
+  }
+}
+
+/* Concept accordion styling */
+.concept-accordion {
+  margin-top: 15px;
+}
+
+.concept-accordion .accordion-button {
+  padding: 10px 15px;
+  font-size: 0.9rem;
+}
+
+.concept-accordion .accordion-button:not(.collapsed) {
+  background-color: rgba(0, 123, 255, 0.1);
+  color: #007bff;
+}
+
+.concept-accordion .accordion-button:focus {
+  box-shadow: none;
+  border-color: rgba(0, 123, 255, 0.25);
+}
+
+.concept-accordion .accordion-body {
+  padding: 15px;
+  font-size: 0.85rem;
+}
+
+/* Scrollbar styles */
+.explanation-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.explanation-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.explanation-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.explanation-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
