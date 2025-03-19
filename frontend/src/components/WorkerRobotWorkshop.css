@@ -1,59 +1,532 @@
-/* Task-Status-Icons */
-.task-status-icon {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.worker-robot-workshop {
+  margin-bottom: 20px;
+}
+
+.workshop-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.workshop-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.workshop-card .card-header {
+  background-color: #1A2634;
   color: white;
-  z-index: 2;
+  font-weight: 600;
+  padding: 15px 20px;
 }
 
-.migration-icon {
-  background-color: #f39c12;
-  animation: rotate-icon 1.5s infinite linear;
-}
-
-.recovering-icon {
-  background-color: #9b59b6;
-  animation: rotate-icon 1.5s infinite linear reverse;
-}
-
-@keyframes rotate-icon {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-/* Migrate Button Animation */
-.migrate-button {
+.robot-card {
+  background-color: white;
+  border-radius: 12px;
+  border-left: 5px solid #cccccc;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  transition: all 0.3s ease;
+  height: 100%;
   position: relative;
   overflow: hidden;
 }
 
-.migrate-button:after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 200%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  animation: migrate-button-shine 2s infinite;
+.robot-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
-@keyframes migrate-button-shine {
-  0% {
-    left: -100%;
+.robot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.robot-header h6 {
+  margin: 0;
+  font-weight: 600;
+}
+
+.robot-body {
+  display: flex;
+  margin-bottom: 15px;
+}
+
+.robot-avatar {
+  flex: 0 0 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.robot-stats {
+  flex: 1;
+  padding-left: 15px;
+}
+
+.load-indicator {
+  margin-bottom: 10px;
+}
+
+.load-indicator span {
+  display: block;
+  font-size: 0.8rem;
+  margin-bottom: 5px;
+  color: #666;
+}
+
+.load-meter {
+  height: 8px;
+  background-color: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+
+.load-level {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.load-percentage {
+  font-size: 0.8rem;
+  color: #666;
+  text-align: right;
+}
+
+.active-tasks {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.robot-actions {
+  margin-top: 15px;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Robot Animation */
+.robot {
+  position: relative;
+  width: 80px;
+  height: 100px;
+  transition: all 0.3s ease;
+}
+
+.robot-head {
+  width: 60px;
+  height: 60px;
+  background-color: #e9ecef;
+  border-radius: 30px;
+  position: relative;
+  margin: 0 auto;
+  border: 2px solid #333;
+  transition: all 0.3s ease;
+}
+
+.robot-eye {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background-color: #333;
+  border-radius: 50%;
+  top: 15px;
+}
+
+.robot-eye-left {
+  left: 12px;
+}
+
+.robot-eye-right {
+  right: 12px;
+}
+
+.robot-mouth {
+  position: absolute;
+  width: 20px;
+  height: 6px;
+  background-color: #333;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 3px;
+}
+
+.robot-body {
+  width: 70px;
+  height: 40px;
+  background-color: #e9ecef;
+  border-radius: 10px;
+  margin: 5px auto 0;
+  border: 2px solid #333;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.robot-panel {
+  width: 40px;
+  height: 20px;
+  background-color: #333;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.robot-light {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid #fff;
+}
+
+.light-green {
+  background-color: #2ecc71;
+  box-shadow: 0 0 10px #2ecc71;
+  animation: glow-green 2s infinite alternate;
+}
+
+.light-yellow {
+  background-color: #f39c12;
+  box-shadow: 0 0 10px #f39c12;
+  animation: glow-yellow 0.5s infinite alternate;
+}
+
+.light-red {
+  background-color: #e74c3c;
+  box-shadow: 0 0 10px #e74c3c;
+  animation: glow-red 0.3s infinite alternate;
+}
+
+.robot-arms {
+  position: relative;
+  width: 100%;
+  height: 20px;
+  margin-top: 5px;
+}
+
+.robot-arm {
+  position: absolute;
+  width: 30px;
+  height: 10px;
+  background-color: #e9ecef;
+  border: 2px solid #333;
+  top: 0;
+  border-radius: 5px;
+}
+
+.robot-arm-left {
+  left: 5px;
+  transform-origin: left center;
+}
+
+.robot-arm-right {
+  right: 5px;
+  transform-origin: right center;
+}
+
+/* Status-specific robot animations */
+.robot.status-idle .robot-eye {
+  border-radius: 50%;
+  animation: blink 3s infinite;
+}
+
+.robot.status-busy .robot-arm-left {
+  animation: wave-left 2s infinite;
+}
+
+.robot.status-busy .robot-arm-right {
+  animation: wave-right 2s infinite;
+}
+
+.robot.status-overloaded .robot-head {
+  animation: overheat 0.5s infinite alternate;
+}
+
+.robot.status-failing {
+  animation: shake 0.5s infinite;
+}
+
+.robot.status-shutdown .robot-eye,
+.robot.status-shutdown .robot-mouth,
+.robot.status-shutdown .robot-panel {
+  background-color: #bbb;
+}
+
+/* Robot type variations */
+.robot-1 .robot-head {
+  background-color: #d6e4ff;
+}
+
+.robot-2 .robot-head {
+  background-color: #d8f3dc;
+}
+
+.robot-3 .robot-head {
+  background-color: #ffe8d6;
+}
+
+/* Worker details section */
+.worker-details {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 15px;
+}
+
+.worker-details h6 {
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+}
+
+.task-list {
+  margin-bottom: 10px;
+}
+
+.task-item {
+  margin-bottom: 5px;
+  padding: 8px;
+  border-radius: 6px;
+  background-color: white;
+  border-left: 3px solid #4a90e2;
+  transition: all 0.2s ease;
+}
+
+.task-item[data-status="MIGRATING"] {
+  border-left-color: #f39c12;
+}
+
+.task-item[data-status="FAILED"] {
+  border-left-color: #e74c3c;
+}
+
+.task-item[data-status="RECOVERING"] {
+  border-left-color: #9b59b6;
+}
+
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.task-id {
+  font-family: monospace;
+  font-size: 0.8rem;
+}
+
+.task-progress {
+  margin-bottom: 5px;
+}
+
+.task-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: #666;
+}
+
+.worker-status-info {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 0.8rem;
+}
+
+/* Migration modal styles */
+.migration-modal .modal-content {
+  border-radius: 12px;
+}
+
+.migration-diagram {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 0;
+  margin-bottom: 20px;
+}
+
+.from-worker, .to-worker {
+  text-align: center;
+}
+
+.worker-label {
+  margin-top: 5px;
+  font-size: 0.8rem;
+}
+
+.migration-arrow {
+  margin: 0 20px;
+  font-size: 1.5rem;
+  color: #4a90e2;
+}
+
+.mini-robot {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto;
+  background-color: #f8f9fa;
+  border-radius: 50%;
+  position: relative;
+  border: 2px solid #333;
+}
+
+.mini-robot .robot-head {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background-color: transparent;
+}
+
+.mini-robot .robot-eye {
+  width: 6px;
+  height: 6px;
+  top: 12px;
+}
+
+.mini-robot .robot-eye-left {
+  left: 9px;
+}
+
+.mini-robot .robot-eye-right {
+  right: 9px;
+}
+
+.worker-selection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.worker-option {
+  padding: 10px;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.worker-option:hover {
+  background-color: #e9ecef;
+}
+
+.worker-option.selected {
+  background-color: #e3f2fd;
+  border: 1px solid #4a90e2;
+}
+
+.worker-option-label {
+  margin-left: 10px;
+  font-size: 0.8rem;
+}
+
+.migration-info {
+  background-color: #f8f9fa;
+  padding: 10px;
+  border-radius: 8px;
+  margin-top: 20px;
+  display: flex;
+  align-items: flex-start;
+  color: #666;
+}
+
+/* Animations */
+@keyframes blink {
+  0%, 45%, 55%, 100% {
+    transform: scaleY(1);
   }
-  25%, 100% {
-    left: 100%;
+  50% {
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes wave-left {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(30deg);
+  }
+}
+
+@keyframes wave-right {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-30deg);
+  }
+}
+
+@keyframes overheat {
+  0% {
+    background-color: #d6e4ff;
+  }
+  100% {
+    background-color: #ffcccb;
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+@keyframes glow-green {
+  0% {
+    box-shadow: 0 0 5px #2ecc71;
+  }
+  100% {
+    box-shadow: 0 0 15px #2ecc71;
+  }
+}
+
+@keyframes glow-yellow {
+  0% {
+    box-shadow: 0 0 5px #f39c12;
+  }
+  100% {
+    box-shadow: 0 0 15px #f39c12;
+  }
+}
+
+@keyframes glow-red {
+  0% {
+    box-shadow: 0 0 5px #e74c3c;
+  }
+  100% {
+    box-shadow: 0 0 15px #e74c3c;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .robot-body {
+    flex-direction: column;
+  }
+  
+  .robot-stats {
+    padding-left: 0;
+    margin-top: 15px;
+  }
+  
+  .robot-avatar {
+    margin: 0 auto;
   }
 }

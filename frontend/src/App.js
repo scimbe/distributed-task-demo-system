@@ -4,8 +4,13 @@ import TaskList from './components/TaskList';
 import TaskDetail from './components/TaskDetail';
 import SystemVisualizer from './components/SystemVisualizer';
 import WorkerRobotWorkshop from './components/WorkerRobotWorkshop';
-import { Container, Row, Col, Button, Form, Alert, Badge } from 'react-bootstrap';
+import TaskJourneyTimeline from './components/TaskJourneyTimeline';
+import StepByStepExplainer from './components/StepByStepExplainer';
+import ExperimentCenter from './components/ExperimentCenter';
+import TaskControlCenter from './components/TaskControlCenter';
+import { Container, Row, Col, Button, Nav, Navbar, Badge, Alert } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
 // Demo-Mock-Daten für den Fall, dass die API nicht funktioniert
 const MOCK_WORKERS = [
@@ -46,20 +51,13 @@ function App() {
   const [workers, setWorkers] = useState(MOCK_WORKERS);
   const [selectedTask, setSelectedTask] = useState(null);
   const [events, setEvents] = useState([]);
-  const [newTaskFormData, setNewTaskFormData] = useState({
-    type: 'computation',
-    priority: 5,
-    data: JSON.stringify({
-      operation: 'complex-calculation',
-      input: [1, 2, 3, 4, 5],
-      iterations: 100
-    }, null, 2)
-  });
   const [lastRefresh, setLastRefresh] = useState(new Date());
   const [error, setError] = useState(null);
   const [loadingTasks, setLoadingTasks] = useState(false);
   const [creatingTask, setCreatingTask] = useState(false);
   const [inDemoMode, setInDemoMode] = useState(false);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [experimentRunning, setExperimentRunning] = useState(false);
 
   // WebSocket für Echtzeit-Updates
   useEffect(() => {
@@ -327,25 +325,15 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // Task-Formular-Handler
-  const handleTaskFormChange = (e) => {
-    const { name, value } = e.target;
-    setNewTaskFormData(prevData => ({
-      ...prevData,
-      [name]: name === 'priority' ? parseInt(value, 10) : value
-    }));
-  };
-
   // Neuen Task erstellen
-  const createNewTask = (e) => {
-    e.preventDefault();
+  const createNewTask = (taskFormData) => {
     setCreatingTask(true);
     
     let taskData;
     try {
-      taskData = newTaskFormData.data.trim() 
-        ? JSON.parse(newTaskFormData.data) 
-        : {};
+      taskData = typeof taskFormData.data === 'string' && taskFormData.data.trim() 
+        ? JSON.parse(taskFormData.data) 
+        : (typeof taskFormData.data === 'object' ? taskFormData.data : {});
     } catch (error) {
       alert('Ungültiges JSON-Format für Task-Daten');
       setCreatingTask(false);
@@ -353,8 +341,8 @@ function App() {
     }
     
     const newTask = {
-      type: newTaskFormData.type,
-      priority: newTaskFormData.priority,
+      type: taskFormData.type,
+      priority: taskFormData.priority,
       data: taskData
     };
     
@@ -377,17 +365,6 @@ function App() {
         console.log('Task erstellt:', data);
         addEvent(`Neuer Task erstellt: ${data.id}`);
         
-        // Formular zurücksetzen
-        setNewTaskFormData({
-          type: 'computation',
-          priority: 5,
-          data: JSON.stringify({
-            operation: 'complex-calculation',
-            input: [1, 2, 3, 4, 5],
-            iterations: 100
-          }, null, 2)
-        });
-        
         // Daten sofort neu laden
         loadTasks();
         setLastRefresh(new Date());
@@ -403,9 +380,9 @@ function App() {
         // Trotzdem eine Task-Erstellung simulieren für die Demo
         const demoTask = {
           id: `demo-${Date.now()}`,
-          type: newTaskFormData.type,
+          type: taskFormData.type,
           status: "CREATED",
-          priority: newTaskFormData.priority,
+          priority: taskFormData.priority,
           data: taskData,
           progress: 0,
           created_at: new Date().toISOString(),
@@ -435,7 +412,7 @@ function App() {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ workerId: targetWorkerId })
+      body: JSON.stringify({ worker_id: targetWorkerId })
     })
       .then(response => {
         if (!response.ok) {
@@ -481,40 +458,121 @@ function App() {
       });
   };
 
-  // JSON-Beispieldaten für den Task
-  const getExampleJSON = (type) => {
-    switch(type) {
-      case 'computation':
-        return JSON.stringify({
-          operation: 'complex-calculation',
-          input: [1, 2, 3, 4, 5],
-          iterations: 100
-        }, null, 2);
-      case 'io':
-        return JSON.stringify({
-          operation: 'file-processing',
-          filePath: '/path/to/file.txt',
-          encoding: 'utf-8'
-        }, null, 2);
-      case 'network':
-        return JSON.stringify({
-          operation: 'http-request',
-          url: 'https://example.com/api',
-          method: 'GET'
-        }, null, 2);
-      default:
-        return '{\n  "key": "value"\n}';
-    }
-  };
-
-  // Handler für die Änderung des Task-Typs
-  const handleTaskTypeChange = (e) => {
-    const newType = e.target.value;
-    setNewTaskFormData(prevData => ({
-      ...prevData,
-      type: newType,
-      data: getExampleJSON(newType)
-    }));
+  // Experiment ausführen
+  const runExperiment = (experiment) => {
+    setExperimentRunning(true);
+    addEvent(`Experiment "${experiment.title}" gestartet`);
+    
+    // Führe nacheinander die Command-Schritte aus
+    const executeCommands = async (commands) => {
+      for (const command of commands) {
+        switch(command.type) {
+          case 'createTasks':
+            for (let i = 0; i < command.count; i++) {
+              const priority = command.priorityRange 
+                ? Math.floor(Math.random() * (command.priorityRange[1] - command.priorityRange[0])) + command.priorityRange[0]
+                : (command.priority || 5);
+                
+              const taskData = {
+                type: 'computation',
+                priority,
+                data: {
+                  operation: 'complex-calculation',
+                  input: [1, 2, 3, 4, 5],
+                  iterations: command.longRunning ? 500 : 100
+                }
+              };
+              
+              await new Promise(resolve => {
+                createNewTask(taskData);
+                setTimeout(resolve, 1000); // Kurze Pause zwischen Task-Erstellungen
+              });
+            }
+            break;
+            
+          case 'wait':
+            await new Promise(resolve => setTimeout(resolve, command.duration));
+            break;
+            
+          case 'failWorker':
+            addEvent(`Simuliere Ausfall von ${command.workerId}`);
+            
+            if (inDemoMode) {
+              // Im Demo-Modus: Simuliere Worker-Ausfall
+              setWorkers(prevWorkers => 
+                prevWorkers.map(worker => 
+                  worker.id === command.workerId 
+                    ? {...worker, status: "FAILING"} 
+                    : worker
+                )
+              );
+              
+              // Simuliere Task-Recovery
+              const affectedTasks = tasks.filter(task => task.worker_id === command.workerId && task.status === 'RUNNING');
+              if (affectedTasks.length > 0) {
+                setTimeout(() => {
+                  // Verschiebe Tasks zu anderen Workern
+                  const availableWorkers = workers.filter(w => w.id !== command.workerId && w.status !== 'FAILING');
+                  if (availableWorkers.length > 0) {
+                    affectedTasks.forEach(task => {
+                      const targetWorker = availableWorkers[Math.floor(Math.random() * availableWorkers.length)];
+                      migrateTask(task.id, targetWorker.id);
+                    });
+                  }
+                }, 2000);
+              }
+            } else {
+              // Im echten Modus: API-Aufruf
+              try {
+                await fetch(`/api/workers/${command.workerId}/fail`, {
+                  method: 'POST'
+                });
+              } catch (error) {
+                console.error('Fehler beim Simulieren des Worker-Ausfalls:', error);
+              }
+            }
+            break;
+            
+          case 'recoverWorker':
+            addEvent(`Stelle Worker ${command.workerId} wieder her`);
+            
+            if (inDemoMode) {
+              // Im Demo-Modus: Simuliere Worker-Wiederherstellung
+              setWorkers(prevWorkers => 
+                prevWorkers.map(worker => 
+                  worker.id === command.workerId 
+                    ? {...worker, status: "IDLE"} 
+                    : worker
+                )
+              );
+            } else {
+              // Im echten Modus: API-Aufruf
+              try {
+                await fetch(`/api/workers/${command.workerId}/recover`, {
+                  method: 'POST'
+                });
+              } catch (error) {
+                console.error('Fehler beim Wiederherstellen des Workers:', error);
+              }
+            }
+            break;
+            
+          case 'message':
+            addEvent(command.text);
+            break;
+            
+          default:
+            console.log('Unbekannter Experiment-Befehl:', command);
+        }
+      }
+      
+      // Experiment abgeschlossen
+      addEvent(`Experiment "${experiment.title}" abgeschlossen`);
+      setExperimentRunning(false);
+    };
+    
+    // Experiment-Befehle ausführen
+    executeCommands(experiment.commands);
   };
 
   // Formatiere das Datum für die Anzeige
@@ -530,158 +588,188 @@ function App() {
   }, {});
 
   return (
-    <Container fluid className="app-container">
-      <h1 className="text-center my-4">Verteiltes Task-System Demo</h1>
-      
-      <Row className="mb-3">
-        <Col>
-          <div className="d-flex justify-content-between align-items-center">
-            <div>
-              <span>Letzte Aktualisierung: {formatTime(lastRefresh)}</span>
-              {inDemoMode && (
-                <Badge bg="warning" className="ms-2">Demo-Modus</Badge>
-              )}
-              {error && (
-                <Alert variant="warning" className="mt-2 mb-0">
-                  <strong>{error}</strong>
-                  <div className="small">Die Demo arbeitet mit simulierten Daten weiter.</div>
-                </Alert>
-              )}
-            </div>
-            <Button 
-              variant="primary" 
-              onClick={refreshData}
-              disabled={loadingTasks}
-            >
-              {loadingTasks ? 'Wird aktualisiert...' : 'Aktualisieren'}
-            </Button>
-          </div>
-        </Col>
-      </Row>
-      
-      <Row>
-        <Col md={8}>
-          <div className="visualizer-container">
-            <h2>System-Visualisierung</h2>
-            <div className="mb-2">
-              <span className="badge bg-primary me-2">Tasks: {tasks.length}</span>
-              {taskCounts.CREATED && <span className="badge bg-info me-2">Erstellt: {taskCounts.CREATED}</span>}
-              {taskCounts.RUNNING && <span className="badge bg-warning me-2">Laufend: {taskCounts.RUNNING}</span>}
-              {taskCounts.COMPLETED && <span className="badge bg-success me-2">Abgeschlossen: {taskCounts.COMPLETED}</span>}
-              {taskCounts.FAILED && <span className="badge bg-danger me-2">Fehlgeschlagen: {taskCounts.FAILED}</span>}
-            </div>
-            <SystemVisualizer 
-              tasks={tasks} 
-              workers={workers} 
-              selectedTask={selectedTask}
-              key={`vis-${lastRefresh.getTime()}`}
-            />
-          </div>
-        </Col>
-        
-        <Col md={4}>
-          <div className="control-panel">
-            <h2>Neuen Task erstellen</h2>
-            <Form onSubmit={createNewTask}>
-              <Form.Group className="mb-3">
-                <Form.Label>Task-Typ</Form.Label>
-                <Form.Select 
-                  name="type" 
-                  value={newTaskFormData.type}
-                  onChange={handleTaskTypeChange}
-                >
-                  <option value="computation">Berechnung</option>
-                  <option value="io">I/O-Operation</option>
-                  <option value="network">Netzwerkoperation</option>
-                </Form.Select>
-              </Form.Group>
-              
-              <Form.Group className="mb-3">
-                <Form.Label>Priorität</Form.Label>
-                <Form.Control 
-                  type="number" 
-                  name="priority" 
-                  min="1" 
-                  max="10" 
-                  value={newTaskFormData.priority}
-                  onChange={handleTaskFormChange}
-                />
-              </Form.Group>
-              
-              <Form.Group className="mb-3">
-                <Form.Label>Task-Daten (JSON)</Form.Label>
-                <Form.Control 
-                  as="textarea" 
-                  name="data" 
-                  rows={4} 
-                  value={newTaskFormData.data}
-                  onChange={handleTaskFormChange}
-                />
-              </Form.Group>
-              
-              <Button 
-                variant="primary" 
-                type="submit" 
-                className="w-100"
-                disabled={creatingTask}
+    <>
+      <Navbar bg="dark" variant="dark" expand="lg">
+        <Container>
+          <Navbar.Brand href="#home">Verteiltes Task-System Demo</Navbar.Brand>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="me-auto">
+              <Nav.Link 
+                href="#dashboard" 
+                active={activeTab === 'dashboard'}
+                onClick={() => setActiveTab('dashboard')}
               >
-                {creatingTask ? 'Task wird erstellt...' : 'Task erstellen'}
+                Dashboard
+              </Nav.Link>
+              <Nav.Link 
+                href="#worker-workshop" 
+                active={activeTab === 'worker-workshop'}
+                onClick={() => setActiveTab('worker-workshop')}
+              >
+                Worker-Werkstatt
+              </Nav.Link>
+              <Nav.Link 
+                href="#task-journey" 
+                active={activeTab === 'task-journey'}
+                onClick={() => setActiveTab('task-journey')}
+              >
+                Task-Reise
+              </Nav.Link>
+              <Nav.Link 
+                href="#experiments" 
+                active={activeTab === 'experiments'}
+                onClick={() => setActiveTab('experiments')}
+              >
+                Experimente
+              </Nav.Link>
+            </Nav>
+            <div className="d-flex align-items-center text-light">
+              {inDemoMode && (
+                <Badge bg="warning" className="me-2">Demo-Modus</Badge>
+              )}
+              <span className="me-2">Letzte Aktualisierung: {formatTime(lastRefresh)}</span>
+              <Button 
+                variant="outline-light" 
+                size="sm"
+                onClick={refreshData}
+                disabled={loadingTasks}
+              >
+                <i className="bi bi-arrow-clockwise me-1"></i>
+                {loadingTasks ? 'Wird aktualisiert...' : 'Aktualisieren'}
               </Button>
-            </Form>
-          </div>
-        </Col>
-      </Row>
-      
-      <Row className="mt-4">
-        <Col>
-          <WorkerRobotWorkshop 
-            workers={workers} 
-            onMigrateTask={migrateTask}
-            tasks={tasks}
-            key={`workers-${lastRefresh.getTime()}`}
-          />
-        </Col>
-      </Row>
-      
-      <Row className="mt-4">
-        <Col md={6}>
-          <h2>Tasks</h2>
-          <TaskList 
-            tasks={tasks} 
-            onSelectTask={selectTask} 
-            selectedTaskId={selectedTask?.id}
-            key={`tasks-${lastRefresh.getTime()}`}
-          />
-        </Col>
+            </div>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
+    
+      <Container fluid className="app-container">
+        {error && (
+          <Alert variant="warning" className="mt-2 mb-3">
+            <strong>{error}</strong>
+            <div className="small">Die Demo arbeitet mit simulierten Daten weiter.</div>
+          </Alert>
+        )}
         
-        <Col md={6}>
-          <h2>System-Ereignisse</h2>
-          <div className="events-container">
-            {events.length > 0 ? (
-              events.map(event => (
-                <div key={event.id} className="event-item">
-                  <span className="event-time">{new Date(event.timestamp).toLocaleTimeString()}</span>
-                  <span className="event-message">{event.message}</span>
+        {activeTab === 'dashboard' && (
+          <>
+            <Row className="mb-4">
+              <Col>
+                <TaskControlCenter 
+                  tasks={tasks} 
+                  workers={workers} 
+                  onCreateTask={createNewTask}
+                  isLoading={creatingTask}
+                />
+              </Col>
+            </Row>
+            
+            <Row>
+              <Col lg={8}>
+                <div className="visualizer-container">
+                  <h2>System-Visualisierung</h2>
+                  <div className="mb-2">
+                    <span className="badge bg-primary me-2">Tasks: {tasks.length}</span>
+                    {taskCounts.CREATED && <span className="badge bg-info me-2">Erstellt: {taskCounts.CREATED}</span>}
+                    {taskCounts.RUNNING && <span className="badge bg-warning me-2">Laufend: {taskCounts.RUNNING}</span>}
+                    {taskCounts.COMPLETED && <span className="badge bg-success me-2">Abgeschlossen: {taskCounts.COMPLETED}</span>}
+                    {taskCounts.FAILED && <span className="badge bg-danger me-2">Fehlgeschlagen: {taskCounts.FAILED}</span>}
+                  </div>
+                  <SystemVisualizer 
+                    tasks={tasks} 
+                    workers={workers} 
+                    selectedTask={selectedTask}
+                    key={`vis-${lastRefresh.getTime()}`}
+                  />
                 </div>
-              ))
-            ) : (
-              <div className="text-center p-3 text-muted">
-                Keine Ereignisse vorhanden
-              </div>
+              </Col>
+              
+              <Col lg={4}>
+                <StepByStepExplainer 
+                  tasks={tasks} 
+                  workers={workers}
+                  events={events}
+                />
+              </Col>
+            </Row>
+          
+            <Row className="mt-4">
+              <Col lg={6}>
+                <h2>Tasks</h2>
+                <TaskList 
+                  tasks={tasks} 
+                  onSelectTask={selectTask} 
+                  selectedTaskId={selectedTask?.id}
+                  key={`tasks-${lastRefresh.getTime()}`}
+                />
+              </Col>
+              
+              <Col lg={6}>
+                <h2>System-Ereignisse</h2>
+                <div className="events-container">
+                  {events.length > 0 ? (
+                    events.map(event => (
+                      <div key={event.id} className="event-item">
+                        <span className="event-time">{new Date(event.timestamp).toLocaleTimeString()}</span>
+                        <span className="event-message">{event.message}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center p-3 text-muted">
+                      Keine Ereignisse vorhanden
+                    </div>
+                  )}
+                </div>
+              </Col>
+            </Row>
+            
+            {selectedTask && (
+              <Row className="mt-4">
+                <Col>
+                  <h2>Task-Details</h2>
+                  <TaskDetail task={selectedTask} />
+                </Col>
+              </Row>
             )}
-          </div>
-        </Col>
-      </Row>
-      
-      {selectedTask && (
-        <Row className="mt-4">
-          <Col>
-            <h2>Task-Details</h2>
-            <TaskDetail task={selectedTask} />
-          </Col>
-        </Row>
-      )}
-    </Container>
+          </>
+        )}
+        
+        {activeTab === 'worker-workshop' && (
+          <Row>
+            <Col>
+              <WorkerRobotWorkshop 
+                workers={workers} 
+                onMigrateTask={migrateTask}
+                tasks={tasks}
+                key={`workers-${lastRefresh.getTime()}`}
+              />
+            </Col>
+          </Row>
+        )}
+        
+        {activeTab === 'task-journey' && (
+          <Row>
+            <Col>
+              <TaskJourneyTimeline
+                tasks={tasks}
+                onSelectTask={selectTask}
+              />
+            </Col>
+          </Row>
+        )}
+        
+        {activeTab === 'experiments' && (
+          <Row>
+            <Col>
+              <ExperimentCenter
+                onRunExperiment={runExperiment}
+                isRunning={experimentRunning}
+              />
+            </Col>
+          </Row>
+        )}
+      </Container>
+    </>
   );
 }
 
